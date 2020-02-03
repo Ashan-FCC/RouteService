@@ -1,7 +1,7 @@
 'use strict'
 
-const RouteCostError = require('./Errors/RouteCostError')
-
+const RouteCalculationError = require('./Errors/RouteCalculationError')
+const util = require('./graph-utils')
 class RouteGraph {
   constructor () {
     this.map = {}
@@ -37,12 +37,12 @@ class RouteGraph {
     let currentStop = stops.shift()
 
     while (stops.length > 0) {
-      if (!this.map.hasOwnProperty(currentStop)) { throw new RouteCostError('No such route') }
+      if (!this.map.hasOwnProperty(currentStop)) { throw new RouteCalculationError('No such route') }
       const nextStop = stops.shift()
       const availableStops = this.map[currentStop]
 
       if (!availableStops.hasOwnProperty(nextStop)) {
-        throw new RouteCostError('No such route')
+        throw new RouteCalculationError('No such route')
       }
 
       costOfRoute += availableStops[nextStop]
@@ -61,13 +61,13 @@ class RouteGraph {
   getCheapestRoute (start, end) {
     // track lowest cost to reach each node
     const startingPoint = this.map[start]
-    if (!startingPoint){
-      throw new RouteCostError('No such route')
+    if (!startingPoint) {
+      throw new RouteCalculationError('No such route')
     }
-    const costs = Object.assign({ [end]: Infinity }, startingPoint)
+    const costs = Object.assign({[end]: Infinity}, startingPoint)
 
     // track paths
-    const parents = { finish: end }
+    const parents = {finish: end}
     for (const child in startingPoint) {
       parents[child] = 'start'
     }
@@ -75,7 +75,7 @@ class RouteGraph {
     // track nodes that have already been processed
     const processed = []
 
-    let node = lowestCostNode(costs, processed)
+    let node = util.lowestCostNode(costs, processed)
 
     while (node) {
       const cost = costs[node]
@@ -92,7 +92,7 @@ class RouteGraph {
         }
       }
       processed.push(node)
-      node = lowestCostNode(costs, processed)
+      node = util.lowestCostNode(costs, processed)
     }
 
     const optimalPath = ['finish']
@@ -109,17 +109,6 @@ class RouteGraph {
     }
 
     return results
-
-    function lowestCostNode(costs, processed){
-      return Object.keys(costs).reduce((lowest, node) => {
-        if (lowest === null || costs[node] < costs[lowest]) {
-          if (!processed.includes(node)) {
-            lowest = node
-          }
-        }
-        return lowest
-      }, null)
-    }
   }
 
   /**
@@ -132,87 +121,11 @@ class RouteGraph {
      * @returns {*[]}
      */
   calcPossibleRoutes (from, to, maxStops = Infinity) {
-    const path = []
+    if (!this.map.hasOwnProperty(from)) { throw new RouteCalculationError('No such route') }
 
-    const linkedNodes = memoize(nodes.bind(null, convertGraphToGraphArray(this.map)))
-    return explore(from, to).filter(s => s.length <= (maxStops + 1))
-
-    function convertGraphToGraphArray (graph) {
-      const graphArray = []
-      for (const node in graph) {
-        for (const adjacentNode in graph[node]) {
-          graphArray.push([node, adjacentNode, graph[node][adjacentNode]])
-        }
-      }
-      return graphArray
-    }
-
-    function explore (currNode, to, resolvedPaths = [], path = []) {
-      path.push(currNode)
-      for (const linkedNode of linkedNodes(currNode)) {
-        if (linkedNode === to) {
-          const result = path.slice()
-          result.push(to)
-          resolvedPaths.push(result)
-          continue
-        }
-        // do not re-explore edges
-        if (!hasEdgeBeenFollowedInPath({
-          edge: {
-            from: currNode,
-            to: linkedNode
-          },
-          path
-        })) {
-          explore(linkedNode, to, resolvedPaths, path)
-        }
-      }
-      path.pop() // sub-graph fully explored
-      return resolvedPaths
-    }
-
-    function hasEdgeBeenFollowedInPath ({ edge, path }) {
-      const indices = allIndices(path, edge.from)
-      return indices.some(i => path[i + 1] === edge.to)
-    }
-
-    function allIndices (arr, val) {
-      var indices = []
-      var i
-      for (i = 0; i < arr.length; i++) {
-        if (arr[i] === val) {
-          indices.push(i)
-        }
-      }
-      return indices
-    }
-
-    /**
-     * Avoids recalculating linked nodes.
-     */
-    function memoize (fn) {
-      const cache = new Map()
-      return function (arg) {
-        var key = JSON.stringify(arguments)
-        var cached = cache.get(key)
-        if (cached) {
-          return cached
-        }
-        cached = fn.apply(this, arguments)
-        cache.set(key, cached)
-        return cached
-      }
-    }
-
-    /**
-         * Get all nodes linked to, from node
-         */
-    function nodes (graph, node) {
-      return graph.reduce((p, c) => {
-        (c[0] === node) && p.push(c[1])
-        return p
-      }, [])
-    }
+    const linkedNodes = util.memoize(util.nodes.bind(null, util.convertGraphToGraphArray(this.map)))
+    const allRoutes = util.explore(linkedNodes, from, to)
+    return allRoutes.filter(route => route.length <= (maxStops + 1) && this.costOfRoute(route) > 0)
   }
 }
 
