@@ -61,6 +61,9 @@ class RouteGraph {
   getCheapestRoute (start, end) {
     // track lowest cost to reach each node
     const startingPoint = this.map[start]
+    if (!startingPoint){
+      throw new RouteCostError('No such route')
+    }
     const costs = Object.assign({ [end]: Infinity }, startingPoint)
 
     // track paths

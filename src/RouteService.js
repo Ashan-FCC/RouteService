@@ -1,5 +1,6 @@
 
 const RouteGraph = require('./RouteGraph')
+const RouteCostError = require('./Errors/RouteCostError')
 const { validateGraph, validateEdge, validateRoute } = require('./Validator')
 
 class RouteService {
@@ -7,6 +8,12 @@ class RouteService {
     this.graph = new RouteGraph()
   }
 
+  /**
+   * Input an array of edges eg: [['A', 'B', 1], ['B', 'D', 5]]
+   * @param inputArray
+   * @returns {RouteService}
+   * @constructor
+   */
   static FromArray (inputArray) {
     validateGraph(inputArray)
 
@@ -26,12 +33,31 @@ class RouteService {
 
   costOfRoute(route){
     const validatedRoute = validateRoute(route)
-    const result = this.graph.costOfRoute(validatedRoute)
+    let result
+    try {
+      result = this.graph.costOfRoute(validatedRoute)
+    } catch(e) {
+      if (e instanceof RouteCostError){
+        result = -1
+      } else {
+        throw e
+      }
+    }
+    return result
   }
 
   numberOfPossibleRoutes(start, end, maxStops){
     const result = this.graph.calcPossibleRoutes(start, end, maxStops)
+    return result.length
   }
+
+  /**
+   * TODO: Add method for bonus question
+  possibleRoutesUnderCost(start, end, maxCost){
+    const result = this.graph.calcPossibleRoutes(start, end, maxStops)
+
+  }
+   */
 }
 
 module.exports = RouteService
