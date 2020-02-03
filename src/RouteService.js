@@ -70,12 +70,13 @@ class RouteService {
       result = this.graph.getCheapestRoute(start, end)
     } catch (e) {
       if (e instanceof RouteCalculationError) {
-        result = -1
+        result = {distance: -1}
       } else {
         throw e
       }
-      return result
+
     }
+    return result.distance
   }
 
   getGraphAsArray () {

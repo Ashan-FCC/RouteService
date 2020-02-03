@@ -2,4 +2,4 @@
 
 const RouteService = require('./RouteService')
 
-export default RouteService
+module.exports = RouteService

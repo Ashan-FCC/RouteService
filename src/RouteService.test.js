@@ -26,4 +26,24 @@ describe('High level test for RouteService', () => {
     assert.equal(routeService.costOfRoute('D-A'), expectedResult)
     assert.equal(routeService.numberOfPossibleRoutes('D', 'A'), expectedResult)
   })
+
+  it('should return correct values for cheapestRoute', () => {
+    assert.equal(routeService.cheapestRoute('A', 'D'), 5)
+
+    const newEdge = ['C', 'D', 1]
+    routeService.addEdge(newEdge)
+    assert.equal(routeService.costOfRoute('A-C-D'), 6)
+
+    assert.equal(routeService.numberOfPossibleRoutes('A', 'D'), 3)
+  })
+
+  it('should return correct values for numberOfPossibleRoutes', () => {
+    assert.equal(routeService.numberOfPossibleRoutes('A', 'D'), 3)
+  })
+
+  it('should return correct values for costOfRoute', () => {
+    const newEdge = ['C', 'D', 1]
+    routeService.addEdge(newEdge)
+    assert.equal(routeService.costOfRoute('A-C-D'), 6)
+  })
 })
