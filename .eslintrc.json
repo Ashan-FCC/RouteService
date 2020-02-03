@@ -17,7 +17,8 @@
     },
     "rules": {
         "quotes": ["error", "single"],
-        "strict": ["error"],
-        "no-prototype-builtins": "off"
+        "no-prototype-builtins": "off",
+        "object-curly-spacing": ["error", "never"],
+        "array-bracket-spacing": ["error", "never"]
     }
 }

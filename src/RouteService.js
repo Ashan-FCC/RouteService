@@ -1,7 +1,8 @@
+'use strict'
 
 const RouteGraph = require('./RouteGraph')
-const RouteCostError = require('./Errors/RouteCostError')
-const { validateGraph, validateEdge, validateRoute } = require('./Validator')
+const RouteCalculationError = require('./Errors/RouteCalculationError')
+const {validateGraph, validateEdge, validateRoute, validateInput} = require('./Validator')
 
 class RouteService {
   constructor () {
@@ -31,13 +32,13 @@ class RouteService {
     this.graph.connect(...edge)
   }
 
-  costOfRoute(route){
+  costOfRoute (route) {
     const validatedRoute = validateRoute(route)
     let result
     try {
       result = this.graph.costOfRoute(validatedRoute)
-    } catch(e) {
-      if (e instanceof RouteCostError){
+    } catch (e) {
+      if (e instanceof RouteCalculationError) {
         result = -1
       } else {
         throw e
@@ -46,11 +47,47 @@ class RouteService {
     return result
   }
 
-  numberOfPossibleRoutes(start, end, maxStops){
-    const result = this.graph.calcPossibleRoutes(start, end, maxStops)
+  numberOfPossibleRoutes (start, end, maxStops) {
+    validateInput(start, end, maxStops)
+    let result
+    try {
+      result = this.graph.calcPossibleRoutes(start, end, maxStops)
+    } catch (e) {
+      if (e instanceof RouteCalculationError) {
+        result = -1
+      } else {
+        throw e
+      }
+      return result
+    }
     return result.length
   }
 
+  cheapestRoute (start, end) {
+    validateInput(start, end)
+    let result
+    try {
+      result = this.graph.getCheapestRoute(start, end)
+    } catch (e) {
+      if (e instanceof RouteCalculationError) {
+        result = -1
+      } else {
+        throw e
+      }
+      return result
+    }
+  }
+
+  getGraphAsArray () {
+    const graphMap = Object.assign({}, this.graph.map)
+    const graphArray = []
+    for (const node in graphMap) {
+      for (const adjacentNode in graphMap[node]) {
+        graphArray.push([node, adjacentNode, graphMap[node][adjacentNode]])
+      }
+    }
+    return graphArray
+  }
   /**
    * TODO: Add method for bonus question
   possibleRoutesUnderCost(start, end, maxCost){

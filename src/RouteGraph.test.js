@@ -1,6 +1,7 @@
+'use strict'
 
 const Graph = require('./RouteGraph')
-const RouteCostError = require('./Errors/RouteCostError')
+const RouteCalculationError = require('./Errors/RouteCalculationError')
 const assert = require('chai').assert
 
 describe('Graph', () => {
@@ -21,20 +22,20 @@ describe('Graph', () => {
 
   describe('Route Cost: ', () => {
     const testCases = [
-      { route: ['A', 'B', 'E'], cost: 4 },
-      { route: ['A', 'D'], cost: 10 },
-      { route: ['E', 'A', 'C', 'F'], cost: 8 },
-      { route: ['A', 'D', 'F'], cost: -1 }
+      {route: ['A', 'B', 'E'], cost: 4},
+      {route: ['A', 'D'], cost: 10},
+      {route: ['E', 'A', 'C', 'F'], cost: 8},
+      {route: ['A', 'D', 'F'], cost: -1}
     ]
 
     testCases.forEach(test => {
       const route = test.route
       const cost = test.cost
       it(`Route: ${route} costs: ${cost}`, () => {
-        if (cost !== -1){
+        if (cost !== -1) {
           assert.equal(g.costOfRoute(route), cost)
         } else {
-          assert.throws(() => g.costOfRoute(route), RouteCostError)
+          assert.throws(() => g.costOfRoute(route), RouteCalculationError)
         }
       })
     })
@@ -57,9 +58,9 @@ describe('Graph', () => {
 
   describe('The cheapest delivery route cost: ', () => {
     const testCases = [
-      { start: 'E', end: 'D', cost: 9 },
-      { start: 'E', end: 'E', cost: 6 },
-      { start: 'A', end: 'E', cost: 4 }
+      {start: 'E', end: 'D', cost: 9},
+      {start: 'E', end: 'E', cost: 6},
+      {start: 'A', end: 'E', cost: 4}
     ]
 
     testCases.forEach(test => {
