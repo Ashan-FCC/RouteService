@@ -74,7 +74,7 @@ function nodes (graph, node) {
  */
 function lowestCostNode (costs, processed) {
   return Object.keys(costs).reduce((lowest, node) => {
-    if ((lowest === null || costs[node] < costs[lowest]) && (!processed.includes(node))) {
+    if ((lowest === null || costs[node] < costs[lowest]) && !processed.includes(node)) {
       lowest = node
     }
     return lowest

@@ -2,7 +2,7 @@
   "name": "eko-route-calculator",
   "version": "1.0.0",
   "description": "A route calculator for eko delivery service",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "mocha src/*.test.js",
     "lint": "npx eslint src",
