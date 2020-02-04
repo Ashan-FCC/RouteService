@@ -74,7 +74,6 @@ class RouteService {
       } else {
         throw e
       }
-
     }
     return result.distance
   }
